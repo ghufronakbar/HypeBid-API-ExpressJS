@@ -13,21 +13,22 @@ generator dbml {
 }
 
 model User {
-  id             String  @id @default(uuid())
-  name           String
-  email          String  @unique
-  password       String
-  phone          String
-  role           Role
-  balance        Float   @default(0)
-  pendingBalance Float   @default(0)
-  image          String?
-  banned         Boolean @default(false)
+  id               String  @id @default(uuid())
+  name             String
+  email            String  @unique
+  password         String
+  phone            String
+  role             Role
+  balance          Float   @default(0)
+  disburbedBalance Float   @default(0)
+  pendingBalance   Float   @default(0)
+  image            String?
+  banned           Boolean @default(false)
 
-  bids          Bid[]
-  auctions      Auction[]
-  withdraws Withdraw[]
-  transactions  Transaction[]
+  bids         Bid[]
+  auctions     Auction[]
+  withdraws    Withdraw[]
+  transactions Transaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -115,7 +116,7 @@ enum TransactionStatus {
 }
 
 model Withdraw {
-  id      String             @id @default(uuid())
+  id      String         @id @default(uuid())
   amount  Float
   bank    String
   account String

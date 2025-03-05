@@ -1,6 +1,6 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
-import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API } from '../../constant/midtrans.js'
+import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API, MIDTRANS_URL_API2 } from '../../constant/midtrans.js'
 import axios, { AxiosError, } from 'axios'
 const router = express.Router()
 
@@ -34,54 +34,94 @@ const getAllTransactions = async (req, res) => {
     }
 }
 
-const getAuction = async (req, res) => {
-    const { id } = req.params
+const getTransaction = async (req, res) => {
     try {
-        const auction = await prisma.auction.findUnique({
+        const { id } = req.params
+        const { id: userId } = req.decoded
+        let transaction = await prisma.transaction.findUnique({
+            include: {
+                auction: {
+                    include: {
+                        seller: true
+                    }
+                }
+            },
             where: {
                 id
-            },
-            include: {
-                bids: {
-                    orderBy: {
-                        createdAt: 'desc'
-                    }
-                },
-                transaction: {
-                    include: {
-                        buyer: true
-                    }
-                },
-                seller: true
-            },
+            }
         })
-        if (!auction) {
-            return res.status(404).json({ status: 404, message: 'Auction not found!' })
+
+        if (!transaction) return res.status(404).json({ status: 404, message: 'Data not found!' })
+
+        if (transaction.userId !== userId) {
+            return res.status(400).json({ status: 400, message: 'You are not seller!' })
         }
 
-        const latestBid = auction.bids[0].amount || auction.openingPrice
-        if (auction.buyNowPrice > latestBid) {
-            auction.isAbleToBid = true
-        } else {
-            auction.isAbleToBid = false
+        const checkStatusTransaction = await midtransCheck(id)
+        console.log(checkStatusTransaction)
+        if (checkStatusTransaction) {
+            const { transaction_status, status_code, settlement_time } = checkStatusTransaction
+            if (status_code && transaction_status && settlement_time && status_code === '200' && transaction_status === 'settlement') {
+                console.log("hitted")
+                const ts = await prisma.transaction.update({
+                    where: {
+                        id
+                    },
+                    data: {
+                        status: "Paid"
+                    },
+                    include: {
+                        auction: {
+                            include: {
+                                seller: true
+                            }
+                        }
+                    }
+                })
+                await prisma.user.update({
+                    where: {
+                        id: ts.auction.seller.id
+                    },
+                    data: {
+                        balance: ts.amount * 100 / 105
+                    }
+                })
+                transaction = ts
+            }
         }
 
-        if (auction.buyNowPrice > latestBid || auction.end < new Date()) {
-            auction.isAbleToFinish = false
-        } else {
-            auction.isAbleToFinish = true
+        const expiredTime = new Date(transaction.createdAt)
+        expiredTime.setDate(expiredTime.getDate() + 1)
+        if (expiredTime < new Date() && transaction.status === "Pending") {
+            transaction.status = "Expired"
         }
 
-        if (auction.userId === userId) {
-            auction.isAbleToBid = false
-        }
-
-        return res.status(200).json({ status: 200, message: 'Success', data: auction })
+        return res.status(200).json({ status: 200, message: 'Success', transactions: transaction })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
     }
 }
+
+const midtransCheck = async (order_id) => {
+    try {
+        const encodedServerKey = Buffer.from(MIDTRANS_SERVER_KEY + ":").toString('base64');
+
+        const { data } = await axios.get(
+            MIDTRANS_URL_API2 + "/v2/" + order_id + "/status",
+            {
+                headers: {
+                    'Authorization': `Basic ${encodedServerKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return data;
+    } catch (error) {
+        console.log('Midtrans Error:', error);
+        return null
+    }
+};
 
 const midtransCheckout = async (order_id, gross_amount) => {
     try {
@@ -200,7 +240,7 @@ const finishAuction = async (req, res) => {
 }
 
 router.get("/", getAllTransactions)
-router.get("/:id", getAuction)
+router.get("/:id", getTransaction)
 router.patch("/:id", finishAuction)
 
 export default router

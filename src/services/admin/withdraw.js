@@ -62,7 +62,8 @@ const setAcceptWithdraw = async (req, res) => {
                 status: "Paid",
                 user: {
                     update: {
-                        pendingBalance: withdraw.user.pendingBalance - withdraw.amount
+                        pendingBalance: withdraw.user.pendingBalance - withdraw.amount,                        
+                        disburbedBalance: withdraw.user.disburbedBalance + withdraw.amount
                     }
                 }
             },
