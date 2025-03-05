@@ -1,0 +1,134 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  id             String  @id @default(uuid())
+  name           String
+  email          String  @unique
+  password       String
+  phone          String
+  role           Role
+  balance        Float   @default(0)
+  pendingBalance Float   @default(0)
+  image          String?
+  banned         Boolean @default(false)
+
+  bids          Bid[]
+  auctions      Auction[]
+  withdraws Withdraw[]
+  transactions  Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum Role {
+  Admin
+  User
+}
+
+model Auction {
+  id          String   @id @default(uuid())
+  name        String
+  description String   @db.Text()
+  location    String
+  images      String[]
+
+  openingPrice Float
+  buyNowPrice  Float
+  minimumBid   Float
+  start        DateTime
+  end          DateTime
+
+  category AuctionCategory
+  status   AuctionStatus
+
+  userId      String
+  seller      User         @relation(fields: [userId], references: [id])
+  transaction Transaction?
+  bids        Bid[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum AuctionStatus {
+  Pending
+  Accepted
+  Rejected
+}
+
+enum AuctionCategory {
+  Tops
+  Bottoms
+  Footwear
+  Accessories
+  Outerwear
+}
+
+model Bid {
+  id     String @id @default(uuid())
+  amount Float
+
+  auctionId String
+  userId    String
+  auction   Auction @relation(fields: [auctionId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Transaction {
+  id        String            @id @default(uuid())
+  amount    Float
+  status    TransactionStatus
+  snapToken String?
+  directUrl String?
+
+  auctionId String  @unique
+  userId    String
+  auction   Auction @relation(fields: [auctionId], references: [id])
+  buyer     User    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum TransactionStatus {
+  Pending
+  Paid
+  Delivered
+  Completed
+  Cancelled
+}
+
+model Withdraw {
+  id      String             @id @default(uuid())
+  amount  Float
+  bank    String
+  account String
+  status  WithdrawStatus
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum WithdrawStatus {
+  Pending
+  Paid
+}
