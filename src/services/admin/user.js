@@ -24,6 +24,16 @@ const getAllUsers = async (req, res) => {
                 name: "asc"
             }
         });
+
+        for (const user of users) {
+            for (const transaction of user.transactions) {
+                const expiredTime = new Date(transaction.createdAt)
+                expiredTime.setDate(expiredTime.getDate() + 1)
+                if (expiredTime < new Date() && transaction.status === "Pending") {
+                    transaction.status = "Expired"
+                }
+            }
+        }
         return res.status(200).json({ status: 200, message: "Success", data: users })
     } catch (error) {
         res.status(500).json({ status: 500, message: "Internal Server Error" })
@@ -63,6 +73,15 @@ const getUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ status: 404, message: "User not found" })
         }
+
+        for (const transaction of user.transactions) {
+            const expiredTime = new Date(transaction.createdAt)
+            expiredTime.setDate(expiredTime.getDate() + 1)
+            if (expiredTime < new Date() && transaction.status === "Pending") {
+                transaction.status = "Expired"
+            }
+        }
+
         return res.status(200).json({ status: 200, message: "Success", data: user })
     } catch (error) {
         res.status(500).json({ status: 500, message: "Internal Server Error" })
