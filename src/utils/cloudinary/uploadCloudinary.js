@@ -1,15 +1,15 @@
 import cloudinary from '../../config/cloudinary.js';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { CLOUDINARY_PROFILE, CLOUDINARY_BOARDING, CLOUDINARY_PANORAMA } from '../../constant/cloudinary.js';
+import { CLOUDINARY_PROFILE, CLOUDINARY_AUCTION, CLOUDINARY_PANORAMA } from '../../constant/cloudinary.js';
 import randomCharacter from '../randomCharacter.js';
 
 const getFolder = (target) => {
     switch (target) {
         case 'profile':
             return CLOUDINARY_PROFILE;
-        case 'boarding':
-            return CLOUDINARY_BOARDING;
+        case 'auction':
+            return CLOUDINARY_AUCTION;
         case 'panorama':
             return CLOUDINARY_PANORAMA;
         default:

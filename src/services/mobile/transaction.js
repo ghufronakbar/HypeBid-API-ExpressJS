@@ -53,11 +53,11 @@ const getTransaction = async (req, res) => {
 
         if (!transaction) return res.status(404).json({ status: 404, message: 'Data not found!' })
 
-        if (transaction.userId !== userId) {
-            return res.status(400).json({ status: 400, message: 'You are not seller!' })
+        if (transaction.userId !== userId && transaction.auction.seller.id !== userId) {
+            return res.status(400).json({ status: 400, message: 'You are not buyer or seller!' })
         }
 
-        const checkStatusTransaction = await midtransCheck(id)
+        const checkStatusTransaction = await midtransCheck(transaction.id)
         console.log(checkStatusTransaction)
         if (checkStatusTransaction) {
             const { transaction_status, status_code, settlement_time } = checkStatusTransaction
@@ -76,14 +76,6 @@ const getTransaction = async (req, res) => {
                                 seller: true
                             }
                         }
-                    }
-                })
-                await prisma.user.update({
-                    where: {
-                        id: ts.auction.seller.id
-                    },
-                    data: {
-                        balance: ts.amount * 100 / 105
                     }
                 })
                 transaction = ts
@@ -239,8 +231,129 @@ const finishAuction = async (req, res) => {
     }
 }
 
+const makeDelivery = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { id: userId } = req.decoded
+
+        const transaction = await prisma.transaction.findUnique({
+            where: {
+                id
+            },
+            include: {
+                auction: {
+                    include: {
+                        seller: true
+                    }
+                }
+            }
+        })
+
+        if (!transaction) {
+            return res.status(404).json({ status: 404, message: 'Transaction not found!' })
+        }
+
+        if (transaction.auction.seller.id !== userId) {
+            return res.status(400).json({ status: 400, message: 'You are not seller!' })
+        }
+
+        if (transaction.status === "Pending") {
+            return res.status(400).json({ status: 400, message: 'Transaction has not been paid!' })
+        }
+
+        if (transaction.status === "Delivered") {
+            return res.status(400).json({ status: 400, message: 'Transaction already delivered!' })
+        }
+
+        if (transaction.status === "Completed") {
+            return res.status(400).json({ status: 400, message: 'Transaction already completed!' })
+        }
+
+        const updatedTransaction = await prisma.transaction.update({
+            where: {
+                id
+            },
+            data: {
+                status: "Delivered"
+            }
+        })
+
+        return res.status(200).json({ status: 200, message: 'Mark as delivered', data: updatedTransaction })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
+    }
+}
+
+const makeCompleted = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { id: userId } = req.decoded
+
+        const transaction = await prisma.transaction.findUnique({
+            where: {
+                id
+            },
+            include: {
+                auction: {
+                    include: {
+                        seller: true
+                    }
+                }
+            }
+        })
+
+        if (!transaction) {
+            return res.status(404).json({ status: 404, message: 'Transaction not found!' })
+        }
+
+        if (transaction.userId !== userId) {
+            return res.status(400).json({ status: 400, message: 'You are not buyer!' })
+        }
+
+        if (transaction.status === "Pending") {
+            return res.status(400).json({ status: 400, message: 'Transaction has not been paid!' })
+        }
+
+        if (transaction.status === "Paid") {
+            return res.status(400).json({ status: 400, message: 'Transaction has not been delivered!' })
+        }
+
+        if (transaction.status === "Completed") {
+            return res.status(400).json({ status: 400, message: 'Transaction already completed!' })
+        }
+
+        const updatedTransaction = await prisma.transaction.update({
+            where: {
+                id
+            },
+            data: {
+                status: "Completed"
+            }
+        })
+
+        await prisma.user.update({
+            where: {
+                id: transaction.auction.seller.id
+            },
+            data: {
+                balance: transaction.amount * 100 / 105
+            }
+        })
+
+        return res.status(200).json({ status: 200, message: 'Mark as completed', data: updatedTransaction })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
+    }
+}
+
 router.get("/", getAllTransactions)
 router.get("/:id", getTransaction)
 router.patch("/:id", finishAuction)
+router.patch("/:id/delivery", makeDelivery)
+router.patch("/:id/completed", makeCompleted)
 
 export default router

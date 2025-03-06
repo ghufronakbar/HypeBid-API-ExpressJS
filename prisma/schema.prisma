@@ -95,6 +95,7 @@ model Transaction {
   id        String            @id @default(uuid())
   amount    Float
   status    TransactionStatus
+  location  String?
   snapToken String?
   directUrl String?
 
@@ -112,7 +113,6 @@ enum TransactionStatus {
   Paid
   Delivered
   Completed
-  Cancelled
 }
 
 model Withdraw {

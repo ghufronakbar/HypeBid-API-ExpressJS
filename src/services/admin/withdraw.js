@@ -8,6 +8,9 @@ const getAllWithdraw = async (req, res) => {
             orderBy: {
                 createdAt: 'desc'
             },
+            include: {
+                user: true
+            }
         })
 
         return res.status(200).json({ status: 200, message: 'Success', data: withdraws })
@@ -29,7 +32,7 @@ const getWithdraw = async (req, res) => {
             },
         })
         if (!withdraw) {
-            return res.status(404).json({ status: 404, message: 'Auction not found!' })
+            return res.status(404).json({ status: 404, message: 'Data not found!' })
         }
         return res.status(200).json({ status: 200, message: 'Success', data: withdraw })
     } catch (error) {
@@ -62,7 +65,7 @@ const setAcceptWithdraw = async (req, res) => {
                 status: "Paid",
                 user: {
                     update: {
-                        pendingBalance: withdraw.user.pendingBalance - withdraw.amount,                        
+                        pendingBalance: withdraw.user.pendingBalance - withdraw.amount,
                         disburbedBalance: withdraw.user.disburbedBalance + withdraw.amount
                     }
                 }
