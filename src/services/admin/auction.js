@@ -36,11 +36,14 @@ const getAuction = async (req, res) => {
         const auction = await prisma.auction.findUnique({
             where: {
                 id
-            },          
+            },
             include: {
                 bids: {
                     orderBy: {
                         createdAt: 'desc'
+                    },
+                    include: {
+                        user: true
                     }
                 },
                 transaction: {
