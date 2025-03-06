@@ -57,6 +57,10 @@ const setAcceptWithdraw = async (req, res) => {
             return res.status(404).json({ status: 404, message: "Withdraw not found" })
         }
 
+        if(withdraw.status === "Paid") {
+            return res.status(400).json({ status: 400, message: "Withdraw already paid" })
+        }
+
         const updatedWithdraw = await prisma.withdraw.update({
             where: {
                 id
