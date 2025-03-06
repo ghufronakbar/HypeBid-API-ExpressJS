@@ -9,7 +9,11 @@ const getAllTransactions = async (req, res) => {
                 createdAt: 'desc'
             },
             include: {
-                auction: true,
+                auction: {
+                    include: {
+                        seller: true
+                    }
+                },
                 buyer: true,
             },
         })
