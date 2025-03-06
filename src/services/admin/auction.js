@@ -57,6 +57,13 @@ const getAuction = async (req, res) => {
         if (!auction) {
             return res.status(404).json({ status: 404, message: 'Auction not found!' })
         }
+
+        const expiredTime = new Date(transaction.createdAt)
+        expiredTime.setDate(expiredTime.getDate() + 1)
+        if (expiredTime < new Date() && auction.transaction.status === "Pending") {
+            transaction.status = "Expired"
+        }
+
         return res.status(200).json({ status: 200, message: 'Success', data: auction })
     } catch (error) {
         console.log(error)
