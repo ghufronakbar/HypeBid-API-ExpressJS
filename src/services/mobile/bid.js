@@ -10,7 +10,16 @@ const getBids = async (req, res) => {
                 createdAt: 'desc'
             },
             include: {
-                auction: true
+                auction: {
+                    include: {
+                        bids: {
+                            orderBy: {
+                                amount: 'desc'
+                            },
+                            take: 1
+                        }
+                    }
+                }
             },
             where: {
                 userId
@@ -33,7 +42,15 @@ const getBid = async (req, res) => {
                 createdAt: 'desc'
             },
             include: {
-                auction: true
+                auction: {
+                    include: {
+                        bids: {
+                            orderBy: {
+                                amount: 'desc'
+                            }
+                        }
+                    }
+                }
             },
             where: {
                 id
