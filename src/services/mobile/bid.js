@@ -2,6 +2,54 @@ import express from 'express'
 import prisma from '../../db/prisma.js'
 const router = express.Router()
 
+const getBids = async (req, res) => {
+    try {
+        const { id: userId } = req.decoded
+        const bids = await prisma.bid.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
+            include: {
+                auction: true
+            },
+            where: {
+                userId
+            }
+        })
+
+        return res.status(200).json({ status: 200, message: 'Success', data: bids })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
+    }
+
+}
+
+const getBid = async (req, res) => {
+    try {
+        const { id } = req.params
+        const bids = await prisma.bid.findUnique({
+            orderBy: {
+                createdAt: 'desc'
+            },
+            include: {
+                auction: true
+            },
+            where: {
+                id
+            }
+        })
+
+        if (!bids) return res.status(404).json({ status: 404, message: 'Data not found!' })
+
+        return res.status(200).json({ status: 200, message: 'Success', data: bids })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
+    }
+
+}
+
 const biddingAuction = async (req, res) => {
     try {
         const { id: userId } = req.decoded
@@ -87,6 +135,8 @@ const biddingAuction = async (req, res) => {
     }
 }
 
+router.get("/", getBids)
+router.get("/:id", getBid)
 router.post("/:id", biddingAuction)
 
 export default router
