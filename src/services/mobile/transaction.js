@@ -27,7 +27,7 @@ const getAllTransactions = async (req, res) => {
             }
         }
 
-        return res.status(200).json({ status: 200, message: 'Success', transactions })
+        return res.status(200).json({ status: 200, message: 'Success', data: transactions })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
@@ -88,7 +88,7 @@ const getTransaction = async (req, res) => {
             transaction.status = "Expired"
         }
 
-        return res.status(200).json({ status: 200, message: 'Success', transactions: transaction })
+        return res.status(200).json({ status: 200, message: 'Success', data: transaction })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
