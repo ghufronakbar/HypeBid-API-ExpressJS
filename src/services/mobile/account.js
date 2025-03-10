@@ -32,7 +32,7 @@ export const login = async (req, res) => {
         if (!check) {
             return res.status(400).json({ status: 400, message: 'Wrong email or password!' })
         }
-        return res.status(200).json({ status: 200, message: 'Login successful!', data: { accessToken, role } })
+        return res.status(200).json({ status: 200, message: 'Login successful!', data: { accessToken, role, ...data } })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
