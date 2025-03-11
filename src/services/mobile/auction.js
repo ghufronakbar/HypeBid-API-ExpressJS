@@ -130,10 +130,10 @@ const getAuction = async (req, res) => {
         }
 
         if (auction.userId === userId) {
-            d.isAbleToBid = false
-            d.isSeller = true
+            auction.isAbleToBid = false
+            auction.isSeller = true
         } else {
-            d.isSeller = false
+            auction.isSeller = false
         }
 
         if (auction.transaction?.buyerId === userId) {
