@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API, MIDTRANS_CLIENT_KEY, MIDTRANS_IS_PRODUCTION, MIDTRANS_MERCHANT_NAME, MIDTRANS_URL_API2, } from "../constant/midtrans";
+import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API, MIDTRANS_CLIENT_KEY, MIDTRANS_IS_PRODUCTION, MIDTRANS_MERCHANT_NAME, MIDTRANS_URL_API2, } from "../constant/midtrans.js";
 
 export const midtransCheckout = async (order_id, gross_amount) => {
     try {
