@@ -1,5 +1,6 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
+import { midtransCheckout } from '../../utils/midtrans.js'
 const router = express.Router()
 
 const getBids = async (req, res) => {
@@ -143,6 +144,45 @@ const biddingAuction = async (req, res) => {
                 userId,
             }
         })
+
+        if (Number(amount) === auction.buyNowPrice) {
+            const amount = highestBid * 1.05
+            const updatedAuction = await prisma.auction.update({
+                where: {
+                    id
+                },
+                data: {
+                    transaction: {
+                        create: {
+                            amount: amount,
+                            status: "Pending",
+                            userId: auction.bids?.[0]?.userId,
+                        }
+                    }
+                },
+                include: {
+                    transaction: {
+                        include: {
+                            buyer: true
+                        }
+                    }
+                }
+            })
+
+            const midtransResponse = await midtransCheckout(updatedAuction.transaction.id, Number(amount))
+
+            const updateTransaction = await prisma.transaction.update({
+                where: {
+                    id: updatedAuction.transaction.id
+                },
+                data: {
+                    snapToken: midtransResponse.token,
+                    directUrl: midtransResponse.redirect_url
+                }
+            })
+
+            return res.status(200).json({ status: 200, message: 'You have won the auction', data: updateTransaction })
+        }
 
         return res.status(200).json({ status: 200, message: 'Success to bid, Good Luck!', data: bidding })
 

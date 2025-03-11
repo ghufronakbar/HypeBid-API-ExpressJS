@@ -1,7 +1,6 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
-import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API, MIDTRANS_URL_API2 } from '../../constant/midtrans.js'
-import axios, { AxiosError, } from 'axios'
+import { midtransCheck, midtransCheckout } from '../../utils/midtrans.js'
 const router = express.Router()
 
 const getAllTransactions = async (req, res) => {
@@ -57,12 +56,10 @@ const getTransaction = async (req, res) => {
             return res.status(400).json({ status: 400, message: 'You are not buyer or seller!' })
         }
 
-        const checkStatusTransaction = await midtransCheck(transaction.id)
-        console.log(checkStatusTransaction)
+        const checkStatusTransaction = await midtransCheck(transaction.id)        
         if (checkStatusTransaction) {
             const { transaction_status, status_code, settlement_time } = checkStatusTransaction
-            if (status_code && transaction_status && settlement_time && status_code === '200' && transaction_status === 'settlement') {
-                console.log("hitted")
+            if (status_code && transaction_status && settlement_time && status_code === '200' && transaction_status === 'settlement') {                
                 const ts = await prisma.transaction.update({
                     where: {
                         id
@@ -94,57 +91,6 @@ const getTransaction = async (req, res) => {
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
     }
 }
-
-const midtransCheck = async (order_id) => {
-    try {
-        const encodedServerKey = Buffer.from(MIDTRANS_SERVER_KEY + ":").toString('base64');
-
-        const { data } = await axios.get(
-            MIDTRANS_URL_API2 + "/v2/" + order_id + "/status",
-            {
-                headers: {
-                    'Authorization': `Basic ${encodedServerKey}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        return data;
-    } catch (error) {
-        console.log('Midtrans Error:', error);
-        return null
-    }
-};
-
-const midtransCheckout = async (order_id, gross_amount) => {
-    try {
-        const encodedServerKey = Buffer.from(MIDTRANS_SERVER_KEY + ":").toString('base64');
-
-        const { data } = await axios.post(
-            MIDTRANS_URL_API + "/snap/v1/transactions",
-            {
-                transaction_details: {
-                    order_id,
-                    gross_amount
-                },
-            },
-            {
-                headers: {
-                    'Authorization': `Basic ${encodedServerKey}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        return data;
-    } catch (error) {
-        if (error instanceof AxiosError) {
-            console.log('Midtrans Error:', error.response?.data || error?.message);
-            throw new Error("MIDTRANS_ERROR");
-        } else {
-            console.log('Midtrans Error:', error);
-            throw new Error("MIDTRANS_ERROR");
-        }
-    }
-};
 
 
 const finishAuction = async (req, res) => {

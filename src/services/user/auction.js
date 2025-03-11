@@ -1,9 +1,8 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
-import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API } from '../../constant/midtrans.js'
-import axios, { AxiosError, } from 'axios'
 import uploadCloudinary from '../../utils/cloudinary/uploadCloudinary.js'
 import { $Enums } from "@prisma/client"
+import { midtransCheckout } from '../../utils/midtrans.js'
 const router = express.Router()
 
 const getAllAuctions = async (req, res) => {
@@ -151,37 +150,6 @@ const getAuction = async (req, res) => {
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })
     }
 }
-
-const midtransCheckout = async (order_id, gross_amount) => {
-    try {
-        const encodedServerKey = Buffer.from(MIDTRANS_SERVER_KEY + ":").toString('base64');
-
-        const { data } = await axios.post(
-            MIDTRANS_URL_API + "/snap/v1/transactions",
-            {
-                transaction_details: {
-                    order_id,
-                    gross_amount
-                },
-            },
-            {
-                headers: {
-                    'Authorization': `Basic ${encodedServerKey}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        return data;
-    } catch (error) {
-        if (error instanceof AxiosError) {
-            console.log('Midtrans Error:', error.response?.data || error?.message);
-            throw new Error("MIDTRANS_ERROR");
-        } else {
-            console.log('Midtrans Error:', error);
-            throw new Error("MIDTRANS_ERROR");
-        }
-    }
-};
 
 
 const finishAuction = async (req, res) => {
@@ -344,19 +312,6 @@ const getOwnedAuctions = async (req, res) => {
     }
 }
 
-
-// name        String
-// description String   @db.Text()
-// location    String
-// images      String[]
-
-// openingPrice Float
-// buyNowPrice  Float
-// minimumBid   Float
-// start        DateTime
-// end          DateTime
-
-// category AuctionCategory
 const makeAuction = async (req, res) => {
     try {
         const { id: userId } = req.decoded
