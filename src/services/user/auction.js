@@ -138,7 +138,7 @@ const getAuction = async (req, res) => {
             auction.isSeller = false
         }
 
-        if (auction.transaction?.buyerId === userId) {
+        if (auction.transaction?.buyer.id === userId) {
             auction.isBuyer = true
         } else {
             auction.isBuyer = false
