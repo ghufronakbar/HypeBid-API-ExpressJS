@@ -98,6 +98,9 @@ const getAuction = async (req, res) => {
                 bids: {
                     orderBy: {
                         createdAt: 'desc'
+                    },
+                    include: {
+                        user: true
                     }
                 },
                 transaction: {
