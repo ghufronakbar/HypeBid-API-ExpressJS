@@ -115,7 +115,7 @@ const getAuction = async (req, res) => {
             return res.status(404).json({ status: 404, message: 'Auction not found!' })
         }
 
-        const latestBid = auction.bids[0].amount || auction.openingPrice
+        const latestBid = auction?.bids[0]?.amount || auction.openingPrice
         if (auction.buyNowPrice > latestBid) {
             auction.isAbleToBid = true
         } else {
@@ -240,7 +240,7 @@ const finishAuction = async (req, res) => {
                     create: {
                         amount: amount,
                         status: "Pending",
-                        userId: auction.bids[0].userId,
+                        userId: auction.bids?.[0]?.userId,
                     }
                 }
             },
