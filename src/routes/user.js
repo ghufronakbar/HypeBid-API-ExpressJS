@@ -1,10 +1,10 @@
 import express from 'express';
 const router = express.Router();
-import account from '../services/mobile/account.js';
-import auction from '../services/mobile/auction.js';
-import bid from '../services/mobile/bid.js';
-import transaction from '../services/mobile/transaction.js';
-import withdraw from '../services/mobile/withdraw.js';
+import account from '../services/user/account.js';
+import auction from '../services/user/auction.js';
+import bid from '../services/user/bid.js';
+import transaction from '../services/user/transaction.js';
+import withdraw from '../services/user/withdraw.js';
 import verification from '../middleware/verification.js';
 
 router.use('/account', account);
