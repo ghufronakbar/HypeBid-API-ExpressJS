@@ -49,7 +49,7 @@ const getAllAuctions = async (req, res) => {
         }
 
         for (const auction of notExpiredAuctions) {
-            const latestBid = auction.bids[0].amount || auction.openingPrice
+            const latestBid = auction?.bids[0]?.amount || auction.openingPrice
             if (auction.buyNowPrice > latestBid) {
                 auction.isAbleToBid = true
             } else {
