@@ -67,7 +67,7 @@ const getAllAuctions = async (req, res) => {
             }
         }
 
-        const data = [...notExpiredAuctions, ...expiredAuctions]
+        const data = [...notExpiredAuctions, ...expiredAuctions].sort((a, b) => new Date(a.start) - new Date(b.start))
 
         for (const d of data) {
             if (d.userId === userId) {
