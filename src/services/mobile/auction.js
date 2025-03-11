@@ -69,6 +69,15 @@ const getAllAuctions = async (req, res) => {
 
         const data = [...notExpiredAuctions, ...expiredAuctions]
 
+        for (const d of data) {
+            if (d.userId === userId) {
+                d.isAbleToBid = false
+                d.isSeller = true
+            } else {
+                d.isSeller = false
+            }
+        }
+
         return res.status(200).json({ status: 200, message: 'Success', data })
     } catch (error) {
         console.log(error)
@@ -118,6 +127,13 @@ const getAuction = async (req, res) => {
 
         if (auction.userId === userId) {
             auction.isAbleToBid = false
+        }
+
+        if (auction.userId === userId) {
+            d.isAbleToBid = false
+            d.isSeller = true
+        } else {
+            d.isSeller = false
         }
 
         return res.status(200).json({ status: 200, message: 'Success', data: auction })
