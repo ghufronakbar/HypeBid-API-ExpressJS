@@ -61,7 +61,7 @@ const getAuction = async (req, res) => {
         const expiredTime = new Date(transaction.createdAt)
         expiredTime.setDate(expiredTime.getDate() + 1)
         if (expiredTime < new Date() && auction.transaction.status === "Pending") {
-            transaction.status = "Expired"
+            auction.transaction.status = "Expired"
         }
 
         return res.status(200).json({ status: 200, message: 'Success', data: auction })
