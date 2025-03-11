@@ -145,8 +145,7 @@ const biddingAuction = async (req, res) => {
             }
         })
 
-        if (Number(amount) === auction.buyNowPrice) {
-            const amount = highestBid * 1.05
+        if (Number(amount) === auction.buyNowPrice) {            
             const updatedAuction = await prisma.auction.update({
                 where: {
                     id
@@ -154,7 +153,7 @@ const biddingAuction = async (req, res) => {
                 data: {
                     transaction: {
                         create: {
-                            amount: amount,
+                            amount: Number(amount),
                             status: "Pending",
                             userId: auction.bids?.[0]?.userId,
                         }
