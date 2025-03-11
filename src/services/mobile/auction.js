@@ -136,6 +136,12 @@ const getAuction = async (req, res) => {
             d.isSeller = false
         }
 
+        if (auction.transaction?.buyerId === userId) {
+            auction.isBuyer = true
+        } else {
+            auction.isBuyer = false
+        }
+
         return res.status(200).json({ status: 200, message: 'Success', data: auction })
     } catch (error) {
         console.log(error)
