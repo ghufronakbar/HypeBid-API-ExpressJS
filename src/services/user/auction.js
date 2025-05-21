@@ -129,6 +129,12 @@ const getAuction = async (req, res) => {
         console.log("[AUCTION END] :", auction.end)
         console.log("auction.end < now", auction.end < now)
 
+        if (auction.end < now && !auction.transaction && auction.userId !== userId) {
+            auction.isWaitingForSeller = true
+        } else {
+            auction.isWaitingForSeller = false
+        }
+
         if (auction.end < now && !auction.transaction && auction.status === "Accepted" && auction.seller.id === userId) {
             auction.isAbleToFinish = true
         } else {
