@@ -1,6 +1,7 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
 import { APP_NAME } from '../../constant/index.js'
+import { sendWhatsapp } from '../../config/whatsapp.js'
 const router = express.Router()
 
 const getAllWithdraw = async (req, res) => {
