@@ -1,7 +1,5 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
-import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API } from '../../constant/midtrans.js'
-import axios, { AxiosError, } from 'axios'
 import { sendWhatsapp } from '../../config/whatsapp.js'
 import { APP_NAME } from '../../constant/index.js'
 const router = express.Router()
