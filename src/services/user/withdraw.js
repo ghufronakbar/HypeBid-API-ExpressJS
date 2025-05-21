@@ -83,17 +83,15 @@ const makeWithdrawal = async (req, res) => {
             },
             data: {
                 balance: user.balance - Number(amount),
-                pendingBalance: user.pendingBalance + Number(amount)
-            }
-        })
-
-        const withdrawal = await prisma.withdraw.create({
-            data: {
-                account,
-                amount,
-                bank,
-                status: "Pending",
-                userId,
+                pendingBalance: user.pendingBalance + Number(amount),
+                withdraws: {
+                    create: {
+                        amount: Number(amount),
+                        account,
+                        bank,
+                        status: "Pending"
+                    }
+                }
             }
         })
 
