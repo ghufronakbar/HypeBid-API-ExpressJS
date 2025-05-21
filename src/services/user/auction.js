@@ -131,8 +131,14 @@ const getAuction = async (req, res) => {
 
         if (auction.end < now && !auction.transaction && auction.userId !== userId) {
             auction.isWaitingForSeller = true
+            auction.isAbleToFinish = true
+            auction.isAbleToBid = false
+            auction.isAbleToFinish = true
         } else {
             auction.isWaitingForSeller = false
+            auction.isAbleToFinish = false
+            auction.isAbleToBid = true
+            auction.isAbleToFinish = false
         }
 
         if (auction.end < now && !auction.transaction && auction.status === "Accepted" && auction.seller.id === userId) {
