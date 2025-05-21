@@ -57,7 +57,7 @@ const getTransaction = async (req, res) => {
         }
 
         const checkStatusTransaction = await midtransCheck(transaction.id)
-        if (checkStatusTransaction) {
+        if (checkStatusTransaction && transaction.status === "Pending") {
             const { transaction_status, status_code, settlement_time } = checkStatusTransaction
             if (status_code && transaction_status && settlement_time && status_code === '200' && transaction_status === 'settlement') {
                 const ts = await prisma.transaction.update({
