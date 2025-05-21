@@ -75,8 +75,8 @@ const register = async (req, res) => {
         })
 
         const { role } = user
-        const accessToken = jwt.sign({ id: created.id, role }, JWT_SECRET)
-        return res.status(200).json({ status: 200, message: 'Register successful!', data: { ...created, accessToken, role } })
+        const accessToken = jwt.sign({ id: user.id, role }, JWT_SECRET)
+        return res.status(200).json({ status: 200, message: 'Register successful!', data: { ...user, accessToken, role } })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ status: 500, message: 'Internal Server Error!' })

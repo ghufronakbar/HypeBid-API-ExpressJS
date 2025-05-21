@@ -137,23 +137,24 @@ const biddingAuction = async (req, res) => {
             return res.status(400).json({ status: 400, message: `Minimum bid is Rp. ${minimumToBid}` })
         }
 
-        const bidding = await prisma.bid.create({
-            data: {
-                amount: Number(amount),
-                auctionId: id,
-                userId,
-            }
-        })
+
 
         if (Number(amount) === auction.buyNowPrice) {
+            const TOTAL_AMOUNT = auction.buyNowPrice * 1.05
             const updatedAuction = await prisma.auction.update({
                 where: {
                     id
                 },
                 data: {
+                    bids: {
+                        create: {
+                            amount: Number(amount),
+                            userId,
+                        }
+                    },
                     transaction: {
                         create: {
-                            amount: Number(amount) * 1.05,
+                            amount: TOTAL_AMOUNT,
                             status: "Pending",
                             userId: auction.bids?.[0]?.userId,
                         }
@@ -168,7 +169,7 @@ const biddingAuction = async (req, res) => {
                 }
             })
 
-            const midtransResponse = await midtransCheckout(updatedAuction.transaction.id, Number(amount))
+            const midtransResponse = await midtransCheckout(updatedAuction.transaction.id, Number(TOTAL_AMOUNT))
 
             const updateTransaction = await prisma.transaction.update({
                 where: {
@@ -181,9 +182,16 @@ const biddingAuction = async (req, res) => {
             })
 
             return res.status(200).json({ status: 200, message: 'You have won the auction', data: updateTransaction })
+        } else {
+            const bidding = await prisma.bid.create({
+                data: {
+                    amount: Number(amount),
+                    auctionId: id,
+                    userId,
+                }
+            })
+            return res.status(200).json({ status: 200, message: 'Success to bid, Good Luck!', data: bidding })
         }
-
-        return res.status(200).json({ status: 200, message: 'Success to bid, Good Luck!', data: bidding })
 
     } catch (error) {
         console.log(error)

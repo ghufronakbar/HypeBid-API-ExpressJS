@@ -102,6 +102,7 @@ const finishAuction = async (req, res) => {
                 id
             },
             include: {
+                transaction: true,
                 bids: {
                     orderBy: {
                         amount: 'desc'
@@ -123,7 +124,16 @@ const finishAuction = async (req, res) => {
             return res.status(400).json({ status: 400, message: 'Auction not accepted!' })
         }
 
+        if (auction.transaction) {
+            return res.status(400).json({ status: 400, message: 'Auction already finished!' })
+        }
+
         let highestBid = 0
+
+        if (auction.bids.length === 0) {
+            return res.status(400).json({ status: 400, message: 'No bids yet!' })
+        }
+
         for (const bid of auction.bids) {
             if (bid.amount > highestBid) {
                 highestBid = bid.amount
@@ -134,7 +144,7 @@ const finishAuction = async (req, res) => {
             return res.status(400).json({ status: 400, message: 'Auction not ended yet!' })
         }
 
-        const amount = highestBid * 1.05
+        const TOTAL_AMOUNT = highestBid * 1.05
         const updatedAuction = await prisma.auction.update({
             where: {
                 id
@@ -142,7 +152,7 @@ const finishAuction = async (req, res) => {
             data: {
                 transaction: {
                     create: {
-                        amount: amount,
+                        amount: TOTAL_AMOUNT,
                         status: "Pending",
                         userId: auction.bids[0].userId,
                     }
@@ -157,7 +167,7 @@ const finishAuction = async (req, res) => {
             }
         })
 
-        const midtransResponse = await midtransCheckout(updatedAuction.id, amount)
+        const midtransResponse = await midtransCheckout(updatedAuction.id, TOTAL_AMOUNT)
 
         const updateTransaction = await prisma.transaction.update({
             where: {
