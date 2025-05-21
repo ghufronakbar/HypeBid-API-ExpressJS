@@ -22,6 +22,7 @@ export const sendWhatsapp = async (target, message) => {
       target,
       message,
     });
+    console.log("WhatsApp response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error sending WhatsApp message:", error);
