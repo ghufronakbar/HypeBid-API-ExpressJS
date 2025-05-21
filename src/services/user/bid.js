@@ -156,7 +156,7 @@ const biddingAuction = async (req, res) => {
                         create: {
                             amount: TOTAL_AMOUNT,
                             status: "Pending",
-                            userId: auction.bids?.[0]?.userId,
+                            userId
                         }
                     }
                 },
