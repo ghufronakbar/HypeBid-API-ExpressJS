@@ -121,7 +121,15 @@ const getAuction = async (req, res) => {
             auction.isAbleToBid = false
         }
 
-        if (auction.buyNowPrice > latestBid || auction.end < new Date() && !auction.transaction) {
+        const now = new Date(
+            new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+        )
+
+        console.log("[NOW] :", now)
+        console.log("[AUCTION END] :", auction.end)
+        console.log("auction.end < now", auction.end < now)
+
+        if (auction.buyNowPrice > latestBid || auction.end < now && !auction.transaction) {
             auction.isAbleToFinish = false
         } else {
             auction.isAbleToFinish = true
