@@ -2,6 +2,8 @@ import express from 'express'
 import prisma from '../../db/prisma.js'
 import { MIDTRANS_SERVER_KEY, MIDTRANS_URL_API } from '../../constant/midtrans.js'
 import axios, { AxiosError, } from 'axios'
+import { sendWhatsapp } from '../../config/whatsapp.js'
+import { APP_NAME } from '../../constant/index.js'
 const router = express.Router()
 
 const getAllOwnWithdraw = async (req, res) => {
@@ -77,7 +79,7 @@ const makeWithdrawal = async (req, res) => {
             return res.status(400).json({ status: 400, message: 'Your balance is not enough!' })
         }
 
-        await prisma.user.update({
+        const withdrawal = await prisma.user.update({
             where: {
                 id: userId
             },
@@ -92,8 +94,18 @@ const makeWithdrawal = async (req, res) => {
                         status: "Pending"
                     }
                 }
+            },
+            include: {
+                withdraws: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    take: 1
+                }
             }
         })
+
+        await sendWhatsapp(user.phone, `*${APP_NAME}*\n\nHi ${user.name},\nYour withdrawal request of ${amount} is pending.\nPlease wait for the confirmation.\n\n*Ref Withdraw ID:* ${withdrawal?.withdraws?.[0]?.id}\n*Amount:* ${amount}\n*Bank:* ${bank}\n*Account:* ${account}\n\nBest regards,\n${APP_NAME}\nThank you!`)
 
         return res.status(200).json({ status: 200, message: 'Success', data: withdrawal })
     } catch (error) {

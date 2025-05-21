@@ -1,5 +1,6 @@
 import express from 'express'
 import prisma from '../../db/prisma.js'
+import { APP_NAME } from '../../constant/index.js'
 const router = express.Router()
 
 const getAllWithdraw = async (req, res) => {
@@ -57,7 +58,7 @@ const setAcceptWithdraw = async (req, res) => {
             return res.status(404).json({ status: 404, message: "Withdraw not found" })
         }
 
-        if(withdraw.status === "Paid") {
+        if (withdraw.status === "Paid") {
             return res.status(400).json({ status: 400, message: "Withdraw already paid" })
         }
 
@@ -78,6 +79,8 @@ const setAcceptWithdraw = async (req, res) => {
                 user: true
             }
         })
+
+        await sendWhatsapp(updatedWithdraw?.user?.phone, `*${APP_NAME}*\n\nHi ${updatedWithdraw?.user?.name},\nYour withdrawal request is accepted.\n\nDetails:\nRef ID: ${withdraw.id}\nBank: ${withdraw.bank}\nAccount: ${withdraw.account}\nAmount: ${withdraw.amount}\n\nPlease check your bank account.\n\nBest regards,\n${APP_NAME}\nThank you!`)
 
         return res.status(200).json({ status: 200, message: "Successfull to accept withdraw", data: updatedWithdraw })
     } catch (error) {
