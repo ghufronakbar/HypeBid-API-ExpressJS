@@ -85,6 +85,28 @@ const getTransaction = async (req, res) => {
             transaction.status = "Expired"
         }
 
+        if (transaction.status !== "Expired") {
+
+            // if (auction.buyNowPrice > latestBid || auction.end < new Date() && !auction.transaction) {
+            //     auction.isAbleToFinish = false
+            // } else {
+            //     auction.isAbleToFinish = true
+            // }
+
+
+            if (transaction.auction.seller.id === userId) {
+                transaction.auction.isSeller = true
+            } else {
+                transaction.auction.isSeller = false
+            }
+
+            if (transaction.userId === userId) {
+                transaction.auction.isBuyer = true
+            } else {
+                transaction.auction.isBuyer = false
+            }
+        }
+
         return res.status(200).json({ status: 200, message: 'Success', data: transaction })
     } catch (error) {
         console.log(error)
