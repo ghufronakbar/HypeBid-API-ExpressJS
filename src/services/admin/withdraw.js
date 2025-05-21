@@ -81,7 +81,7 @@ const setAcceptWithdraw = async (req, res) => {
             }
         })
 
-        await sendWhatsapp(updatedWithdraw?.user?.phone, `*${APP_NAME}*\n\nHi ${updatedWithdraw?.user?.name},\nYour withdrawal request is accepted.\n\nDetails:\nRef ID: ${withdraw.id}\nBank: ${withdraw.bank}\nAccount: ${withdraw.account}\nAmount: ${withdraw.amount}\n\nPlease check your bank account.\n\nBest regards,\n${APP_NAME}\nThank you!`)
+        await sendWhatsapp(updatedWithdraw?.user?.phone, `*${APP_NAME}*\n\nHi ${updatedWithdraw?.user?.name},\nYour disbursement request is accepted.\n\nDetails:\nRef ID: ${withdraw.id}\nBank: ${withdraw.bank}\nAccount: ${withdraw.account}\nAmount: ${withdraw.amount}\n\nPlease check your bank account.\n\nBest regards,\n${APP_NAME}\nThank you!`)
 
         return res.status(200).json({ status: 200, message: "Successfull to accept withdraw", data: updatedWithdraw })
     } catch (error) {

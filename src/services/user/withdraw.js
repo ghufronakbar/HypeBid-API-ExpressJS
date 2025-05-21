@@ -103,7 +103,7 @@ const makeWithdrawal = async (req, res) => {
             }
         })
 
-        await sendWhatsapp(user.phone, `*${APP_NAME}*\n\nHi ${user.name},\nYour withdrawal request of ${amount} is pending.\nPlease wait for the confirmation.\n\n*Ref Withdraw ID:* ${withdrawal?.withdraws?.[0]?.id}\n*Amount:* ${amount}\n*Bank:* ${bank}\n*Account:* ${account}\n\nBest regards,\n${APP_NAME}\nThank you!`)
+        await sendWhatsapp(user.phone, `*${APP_NAME}*\n\nHi ${user.name},\nYour disbursement request of ${amount} is pending.\nPlease wait for the confirmation.\n\n*Ref Disbursement ID:* ${withdrawal?.withdraws?.[0]?.id}\n*Amount:* ${amount}\n*Bank:* ${bank}\n*Account:* ${account}\n\nBest regards,\n${APP_NAME}\nThank you!`)
 
         return res.status(200).json({ status: 200, message: 'Success', data: withdrawal })
     } catch (error) {
