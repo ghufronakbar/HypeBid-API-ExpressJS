@@ -8,6 +8,7 @@ import { PORT, SERVER_URL } from './constant/index.js';
 
 import adminRoutes from './routes/admin.js';
 import userRoutes from './routes/user.js';
+import prisma from './db/prisma.js';
 
 const app = express();
 
@@ -24,6 +25,16 @@ app.use('/api/user', userRoutes);
 app.get('/', (req, res) => {
   return res.status(200).json({ status: 200, message: "Hello World" });
 })
+
+app.get('/db-test', async (req, res) => {
+  try {
+    const data = await prisma.user.findMany();
+    return res.status(200).json({ status: 200, message: "Success", data });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ status: 500, message: "Internal Server Error", error: error?.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`⚡️[server]: Server started on port ${PORT} ⚡`);
