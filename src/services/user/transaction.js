@@ -311,12 +311,16 @@ const makeCompleted = async (req, res) => {
             }
         })
 
+        const oldBalance = transaction.auction.seller.balance
+        const newBalance = transaction.amount * 100 / 105
+        const finalBalance = oldBalance + newBalance
+
         await prisma.user.update({
             where: {
                 id: transaction.auction.seller.id
             },
             data: {
-                balance: transaction.amount * 100 / 105
+                balance: Number(finalBalance)
             }
         })
 
